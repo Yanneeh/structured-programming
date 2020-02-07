@@ -1,8 +1,6 @@
 # Structured programming
 
-(C) Yannick van Diermen, 2020.
-
----
+Yannick van Diermen, 2020.
 
 ### Compilen en runnen van c code
 
