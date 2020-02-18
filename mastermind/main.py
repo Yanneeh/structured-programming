@@ -1,43 +1,23 @@
-import os
 import time
 import sys
 import random
 from termcolor import cprint, colored
 
+from func import *
+# from algo import solve
 
-# Globals of alle variabelen binnen functie met returns?
-colors = ['red', 'green', 'cyan', 'grey', 'yellow', 'blue', 'magenta', 'white']
-gamemode = None
+# Acht hoofdkleuren.
+colors = ['red', 'green', 'yellow', 'blue', 'magenta', 'white']
 
-def typewriter(word, color='white', delay=0.1):
-	for char in word:
-		time.sleep(delay)
-		sys.stdout.write(colored(char, color))
-		sys.stdout.flush()
-
-def clear_screen():
-	os.system('clear')
-
-def clean_guess(guess):
-
-	formatted_guess = guess.split(',')
-
-	for i in range(len(formatted_guess)):
-		formatted_guess[i] = formatted_guess[i].strip()
-
-	return formatted_guess
-
-clean_guess('red, de, blue, cyan')
-
-def check_guess(guess, code):
-	pass
+# Default gamemode is code-breker.
+gamemode = 2
 
 def start():
 	clear_screen()
 
 	# Title screen
-	typewriter("""              _
-              | |
+	typewriter("""               _
+	      | |
  __      _____| | ___ ___  _ __ ___   ___
  \ \ /\ / / _ \ |/ __/ _ \| '_ ` _ \ / _ \ \r
   \ V  V /  __/ | (_| (_) | | | | | |  __/
@@ -74,105 +54,131 @@ def init():
 
 	typewriter('There are two gamemodes.')
 	print('\r')
-	typewriter('You either play as code-maker or as code-cracker.')
+	typewriter('You either play as code-maker or as code-breaker.')
 	print('\n')
 	typewriter('Lets start by picking a gamemode:', 'cyan')
 	print('\r')
 	cprint('(1) code-maker')
-	cprint('(2) code-cracker')
+	cprint('(2) code-breaker')
 
 	gamemode_choice = input()
 
 	try:
 		if int(gamemode_choice) == 1:
-			typewriter('You chose to be the code-maker' , 'cyan')
-			print('\r')
-
-			cprint('Function not implemented yet', 'red')
-			sys.exit()
-
-			gamemode = 1
-
-		elif int(gamemode_choice) == 2:
-			typewriter('You chose to be the code-cracker' , 'cyan')
+			typewriter('You chose to be the code-maker.' , 'cyan')
 			time.sleep(1)
 			print('\r')
 
-			gamemode = 2
+			return 1
+
+		elif int(gamemode_choice) == 2:
+			typewriter('You chose to be the code-breaker.' , 'cyan')
+			time.sleep(1)
+			print('\r')
+
+			return 2
 	except:
 		cprint('Please enter the right number.' , 'red')
 		sys.exit()
 
 
 def game():
+
 	clear_screen()
 
-	guessed = False
 	guesses = []
-	code = []
-
-	colors = ['red', 'green', 'cyan', 'grey', 'yellow', 'blue', 'magenta', 'white']
-
-	gamemode = 2
-
-	typewriter('Lets start round one.', 'green')
-	time.sleep(1)
-	print('\n')
 
 	if gamemode == 1:
-		pass
+		clear_screen()
 
-	elif gamemode == 2:
+		code = custom_code(colors)
 
-		# Pick random code
-		for i in range(4):
-			color = random.choice(colors)
-			code.append(color)
-			colors.remove(color)
+		typewriter('The computer is going to guess your code.', 'green')
+		time.sleep(1)
+		print('\n')
 
 		while len(guesses) < 10:
 
-			# TODO: Print the previous result here.
+			show_guesses(guesses, code)
+
+			guess = solve(guesses)
+
+			time.sleep(1)
+
+			guesses.append(guess)
+
+			answer = check_guess(guess, code)
+
+			if check_answer(answer):
+				print('\n')
+				cprint('De computer heeft gewonnen gewonnen!', 'green', attrs=['blink'])
+				print('\n')
+				break
+
+	elif gamemode == 2:
+
+		code = random_code(colors)
+
+		typewriter('Lets start round one.', 'green')
+		time.sleep(1)
+		print('\n')
+
+		while len(guesses) < 10:
+
+			clear_screen()
+
+			show_guesses(guesses, code)
+
+			show_colors(colors)
 
 			cprint('Guess four colors ...', 'cyan', attrs=["blink"])
 
 			guess = input()
 
-			guess = clean_guess(guess)
+			guess = format_input(guess)
+
+			guesses.append(guess)
 
 			answer = check_guess(guess, code)
 
-			if answer:
-				guessed = True
-			else:
-				guesses.append(guess)
+			if check_answer(answer):
+				print('\n')
+				cprint('Je hebt gewonnen!', 'green', attrs=['blink'])
+				print('\n')
+				break
 
-		if guessed:
-			print('you guessed it')
 
+def stop_game():
+	cprint('Do you want to play again?', 'cyan', attrs=['blink'])
+	cprint('(1) Yes')
+	cprint('(2) No')
+
+	choice = input()
+
+	try:
+		if int(choice) == 1:
+			return False
+
+		elif int(choice) == 2:
+			return True
+		else:
+			return True
+
+	except Exception as e:
+		return True
+
+# Start scene
 start()
 
-init()
+# Main game loop
+while True:
 
-game()
+	# Init scene
+	gamemode = init()
 
-# while True:
-# 	init()
-#
-# 	game()
-#
-# 	cprint('Do you want to play again?', 'cyan')
-# 	cprint('(1) Yes')
-# 	cprint('(2) No')
-#
-# 	choice = input()
-#
-# 	try:
-# 		if int(choice) == 1:
-# 			continue
-#
-# 		elif int(choice) == 2:
-# 			break
-#
-# 	except:
-# 		cprint('Please enter the right number.' , 'red')
+	# Game scene
+	game()
+
+	# Vraag de speler of diegene verder wilt spelen.
+	if stop_game():
+		break
