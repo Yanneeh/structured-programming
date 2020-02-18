@@ -31,7 +31,7 @@ def start():
  |_| |_| |_|\__,_|___/\__\___|_|  |_| |_| |_|_|_| |_|\__,_|""", 'green', 0.005)
 
 	print('\n')
-	cprint('(C) Yannick van Diermen, 2020', 'blue')
+	cprint('(C) Yannick van Diermen, 2020', 'blue') #vette copyright hoor!
 	print('\n')
 	cprint('press enter to start ...', attrs=['blink'], end="")
 
@@ -40,7 +40,7 @@ def start():
 def init():
 	clear_screen()
 
-	# Rules
+	# Rules   Volgends clean coding: Don't comment out code. Just remove.   ( maar ik doe dit ook, neem met korrel zout.)
 
 	# typewriter("First let's explain the rules.", 'green')
 	# print('\r')
@@ -62,7 +62,7 @@ def init():
 	cprint('(2) code-breaker')
 
 	gamemode_choice = input()
-
+	#mooi afgevangen van dingen.
 	try:
 		if int(gamemode_choice) == 1:
 			typewriter('You chose to be the code-maker.' , 'cyan')
