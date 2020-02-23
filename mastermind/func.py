@@ -66,14 +66,20 @@ def format_input(str):
 
 def check_guess(guess, code):
 	pins = []
+	checked = []
 
 	for i in range(4):
 		if guess[i] == code[i]:
+			checked.append(guess[i])
 			pins.append('red')
-		elif guess[i] in code:
+
+	for i in range(4):
+		if guess[i] in code and guess[i] not in checked:
+			checked.append(guess[i])
 			pins.append('white')
-		else:
-			pins.append('grey')
+
+	for i in range(4-len(pins)):
+		pins.append('grey')
 
 	random.shuffle(pins)
 
@@ -107,7 +113,7 @@ def custom_code(colors):
 		if choice in colors:
 			continue
 		else:
-			cprint('Colors not constructed properly')
+			cprint('Code not constructed properly')
 			sys.exit()
 
 	return code

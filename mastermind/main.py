@@ -4,13 +4,13 @@ import random
 from termcolor import cprint, colored
 
 from func import *
-# from algo import solve
+from algo import random_solve, simple_solve, generate_posibilities
 
-# Acht hoofdkleuren.
+# Zes hoofdkleuren.
 colors = ['red', 'green', 'yellow', 'blue', 'magenta', 'white']
 
 # Default gamemode is code-breker.
-gamemode = 2
+gamemode = 1
 
 def start():
 	clear_screen()
@@ -37,25 +37,16 @@ def start():
 
 	start = input()
 
-def init():
 	clear_screen()
-
-	# Rules   Volgends clean coding: Don't comment out code. Just remove.   ( maar ik doe dit ook, neem met korrel zout.)
-
-	# typewriter("First let's explain the rules.", 'green')
-	# print('\r')
-	# cprint('There are eight colors', attrs=["blink"])
-	# time.sleep(0.5)
-	# cprint('There are m', attrs=["blink"])
-	# time.sleep(0.5)
-
-	# print('\n')
-	# time.sleep(0.5)
 
 	typewriter('There are two gamemodes.')
 	print('\r')
 	typewriter('You either play as code-maker or as code-breaker.')
 	print('\n')
+
+def init():
+	clear_screen()
+
 	typewriter('Lets start by picking a gamemode:', 'cyan')
 	print('\r')
 	cprint('(1) code-maker')
@@ -91,29 +82,38 @@ def game():
 	if gamemode == 1:
 		clear_screen()
 
+		show_colors(colors)
+
 		code = custom_code(colors)
+
+		clear_screen()
 
 		typewriter('The computer is going to guess your code.', 'green')
 		time.sleep(1)
 		print('\n')
 
+		posibilities = generate_posibilities(colors)
+
+		guess = random.choice(posibilities)
+
 		while len(guesses) < 10:
+
+			clear_screen()
+
+			guesses.append(guess)
 
 			show_guesses(guesses, code)
 
-			guess = solve(guesses)
-
 			time.sleep(1)
-
-			guesses.append(guess)
 
 			answer = check_guess(guess, code)
 
 			if check_answer(answer):
-				print('\n')
-				cprint('De computer heeft gewonnen gewonnen!', 'green', attrs=['blink'])
+				cprint(f'De computer has won the game within {len(guesses)} guesses!', 'green', attrs=['blink'])
 				print('\n')
 				break
+
+			guess = simple_solve(guess, answer, posibilities)
 
 	elif gamemode == 2:
 
