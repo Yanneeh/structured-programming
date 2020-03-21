@@ -63,3 +63,20 @@ CREATE TABLE profiles (
 	latest_order timestamp,
 	order_amount int
 );
+
+-- Business rule #1
+SELECT id FROM products
+WHERE target_demographic='<demographic>'
+ORDER BY RANDOM()
+LIMIT 5;
+
+-- Business rule #2
+SELECT session_id FROM orders
+WHERE product_id='<product_id>'
+ORDER BY RANDOM()
+LIMIT 5;
+	-- For every session
+	SELECT product_id FROM orders
+	WHERE session_id = '<session_id>' AND product_id != '<product_id>'
+	ORDER BY RANDOM()
+	LIMIT 1;

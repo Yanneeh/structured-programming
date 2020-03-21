@@ -5,7 +5,7 @@ import time
 from multiprocessing import Process
 from func import *
 
-def migrate_sessions(sessions_collection, profiles_collection, start=0, stop=100):
+def migrate_sessions(sessions_collection, profiles, start=0, stop=100):
 
     sessions = []
     orders = []
@@ -53,7 +53,7 @@ def migrate_sessions(sessions_collection, profiles_collection, start=0, stop=100
 
 def migrate_profiles(profiles_collection):
     profiles = []
-    products = []
+    recommended = []
 
     for profile in profiles_collection:
         if profile.get('order'):
@@ -71,19 +71,21 @@ def migrate_profiles(profiles_collection):
                 'order_amount': None
             })
 
-        if profiles.get('previously_recommended'):
-            for product in profiles['previously_recommended']:
-                products.append({
+        try:
+            for product in profile['previously_recommended']:
+                recommended.append({
                     'product_id': str(product),
                     'profile_id': profile.get('_id')
                 })
+        except KeyError:
+            pass
 
     recommended_file = open('recommended.csv', 'w')
 
     fields = ['product_id', 'profile_id']
 
     # Write data to csv
-    write_csv(recommended_file, fields, products)
+    write_csv(recommended_file, fields, recommended)
 
     profiles_file = open('profiles.csv', 'w')
 
@@ -97,95 +99,126 @@ def migrate_products(product_collection):
     products = []
 
     for product in product_collection:
+
+        price = None
+        discount = None
+        stock = None
+        online_only = None
+        target_demographic = None
+        unit = None
+        odor_type = None
+        series = None
+        kind = None
+        variant = None
+        type = None
+        type_of_hair_care = None
+        type_of_hair_coloring = None
+
         if product.get('properties'):
-            pass
+            stock = product['properties'].get('availability')
+            online_only = product['properties'].get('online_only')
+            target_demographic = product['properties'].get('doelgroep')
+            unit = product['properties'].get('eenheid')
+            odor_type = product['properties'].get('odor_type')
+            series = product['properties'].get('serie')
+            kind = product['properties'].get('soort')
+            variant = product['properties'].get('variant')
+            type = product['properties'].get('type')
+            type_of_hair_care = product['properties'].get('soorthaarverzorging')
+            type_of_hair_coloring = product['properties'].get('typehaarkleuring')
+
+
         if product.get('price'):
-            pass
-        else:
-            products.append({
-                'id': product.get('_id'),
-                'name': product.get('name'),
-                'description',
-                'brand',
-                'price',
-                'discount',
-                'stock',
-                'category',
-                'sub_category',
-                'sub_sub_category',
-                'sub_sub_sub_category',
-                'recommendable',
-                'online_online',
-                'target_demographic',
-                'gender',
-                'color',
-                'unit',
-                'odor_type',
-                'series',
-                'kind',
-                'variant',
-                'type',
-                'type_of_hair_care',
-                'type_of_hair_coloring'
-            })
+            price = product['price'].get('mrsp')
+            discount = product['price'].get('discount')
+
+            if price:
+                price = int(price)
+
+            if discount:
+                discount = int(discount)
 
 
-    profiles_file = open('profiles.csv', 'w')
+        products.append({
+            'id': product.get('_id'),
+            'name': product.get('name'),
+            'description': product.get('description'),
+            'brand': product.get('brand'),
+            'price': price,
+            'discount': discount,
+            'stock': stock,
+            'category': product.get('category'),
+            'sub_category': product.get('sub_category'),
+            'sub_sub_category': product.get('sub_sub_category'),
+            'sub_sub_sub_category': product.get('sub_sub_sub_category'),
+            'recommendable': product.get('recommendable'),
+            'online_only': online_only,
+            'target_demographic': target_demographic,
+            'gender': product.get('gender'),
+            'color': product.get('color'),
+            'unit': unit,
+            'odor_type': odor_type,
+            'series': series,
+            'kind': kind,
+            'variant': variant,
+            'type': type,
+            'type_of_hair_care': type_of_hair_care,
+            'type_of_hair_coloring': type_of_hair_coloring
+        })
+
+    profiles_file = open('products.csv', 'w')
 
     fields = [
                 'id', 'name', 'description', 'brand',
                 'price', 'discount', 'stock', 'category',
                 'sub_category', 'sub_sub_category', 'sub_sub_sub_category',
-                'recommendable', 'online_online', 'target_demographic', 'gender',
+                'recommendable', 'online_only', 'target_demographic', 'gender',
                 'color', 'unit', 'odor_type', 'series', 'kind', 'variant', 'type',
                 'type_of_hair_care', 'type_of_hair_coloring'
     ]
 
     # Write data to csv
-    write_csv(products_file, fields, products)
+    write_csv(profiles_file, fields, products)
 
 db = MongoClient('mongodb://localhost:27017')
 start_time = time.time()
 
-def main():
-    product_collection = db.huwebshop.products.find()
+product_collection = db.huwebshop.products.find()
 
-    print('Migrating products')
-    migrate_products(product_collection)
-    print('Done')
+print('Migrating products')
+migrate_products(product_collection)
+print('Done')
 
-    profiles_collection = db.huwebshop.profiles.find()
+# profiles_collection = db.huwebshop.profiles.find()
 
-    print('Migrating profiles')
-    migrate_profiles(profiles_collection)
-    print('Done')
+# print('Migrating profiles')
+# migrate_profiles(profiles_collection)
+# print('Done')
 
-    # Sort profiles
-    print('Sorting profiles')
-    sorted_profiles = sort_profiles(profiles_collection)
-    print('Done')
+# Sort profiles
+# print('Sorting profiles')
+# sorted_profiles = sort_profiles(profiles_collection)
+# print('Done')
 
-main()
+# if __name__ == "__main__":
+#
+#     processes = []
+#
+#     print('Migrating sessions')
+#
+#     for i in range(10):
+#         p = Process(target=migrate_sessions, args=(db.huwebshop.sessions.find(), sorted_profiles, i*1000, (i+1)*1000,))
+#         p.start()
+#         processes.append(p)
+#
+#     for p in processes:
+#         p.join()
+#
+#     print('Done')
 
-if __name__ == "__main__":
+end_time = time.time()
 
-    processes = []
+elapsed_time = end_time - start_time
 
-    print('Migrating sessions')
-
-    for i in range(10):
-        p = Process(target=migrate_sessions, args=(db.huwebshop.sessions.find(), profiles_collection, i*1000, (i+1)*1000,))
-        p.start()
-        processes.append(p)
-
-    for p in processes:
-        p.join()
-
-    print('Done')
-
-    end_time = time.time()
-
-    elapsed_time = end_time - start_time
-
-    # Generate log file
-    generate_log(elapsed_time, end_time)
+# Generate log file
+generate_log(elapsed_time)
