@@ -3,6 +3,9 @@ import csv
 import random
 import time
 
+def copy_to_db():
+    pass
+
 def random_code(l):
     n = []
     for i in range(l):
